@@ -1,40 +1,47 @@
 package com.roman.adoberoman.web;
 
 
+import com.roman.adoberoman.services.GetRomanService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import javax.annotation.PostConstruct;
-import java.util.TreeMap;
 
 @RestController
 @RequestMapping(path = "/romannumeral")
+@Api(value="roman", description = "Service to convert decimal to roman equivalents", tags = ("roman"))
 public class DecimalToRomanController {
 
-    private TreeMap<Integer,String> decToRomMap = new TreeMap<Integer,String>();
+    @Autowired
+    GetRomanService romanService;
 
-    @PostConstruct
-    public void init() {
-        decToRomMap.put(1000, "M");
-        decToRomMap.put(900, "CM");
-        decToRomMap.put(500, "D");
-        decToRomMap.put(400, "CD");
-        decToRomMap.put(100, "C");
-        decToRomMap.put(90, "XC");
-        decToRomMap.put(50, "L");
-        decToRomMap.put(40, "XL");
-        decToRomMap.put(10, "X");
-        decToRomMap.put(9, "IX");
-        decToRomMap.put(5, "V");
-        decToRomMap.put(4, "IV");
-        decToRomMap.put(1, "I");
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(DecimalToRomanController.class);
+
+    private final Counter decimalToRomanCounter;
+
+    public DecimalToRomanController(MeterRegistry registry) {
+        this.decimalToRomanCounter = Counter.builder("api.convertDecimalToRoman").
+                register(registry);
     }
 
+
+
     @RequestMapping(method= RequestMethod.GET)
+    @ApiOperation(value = "Convert decimal to roman" ,notes = "Convert input decimal less than 3999 to roman", nickname = "convertDecimalToRoman")
     public String convertDecimalToRoman(@RequestParam int query) {
-        StringBuilder roman = new StringBuilder();
+        decimalToRomanCounter.increment();
+        LOGGER.debug("convertDecimalToRoman start called with query input : " + query);
 
         /*validate query
          - only integer bad req
@@ -42,24 +49,16 @@ public class DecimalToRomanController {
          -
         */
         if(query ==0 || query > 3999) {
+            LOGGER.debug("invalid input throwing exception :" + query);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid inputs are 1-3999");
         }
 
         //find roman
-        while(query > 0) {
-            // greatest key less than or equal to given key
-            int num = decToRomMap.floorKey(query);
+        String romanVal = romanService.calculateRoman(query);
 
-            int div = query / num;
-            String val = decToRomMap.get(num);
-            while(div > 0){
-                roman.append(val);
-                div--;
-            }
-            query = query % num;
-        }
-
-        return roman.toString();
+        LOGGER.debug("convertDecimalToRoman ends output : " + romanVal);
+        return romanVal;
     }
+
 
 }
