@@ -48,7 +48,7 @@ public class DecimalToRomanController {
          - 1-3999 bad req
          -
         */
-        if(query ==0 || query > 3999) {
+        if(query <=0 || query > 3999) {
             LOGGER.debug("invalid input throwing exception :" + query);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid inputs are 1-3999");
         }
@@ -57,6 +57,10 @@ public class DecimalToRomanController {
         String romanVal = romanService.calculateRoman(query);
 
         LOGGER.debug("convertDecimalToRoman ends output : " + romanVal);
+        if(romanVal == "") {
+            //something went wrong
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Valid inputs are 1-3999");
+        }
         return romanVal;
     }
 
