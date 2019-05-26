@@ -44,8 +44,8 @@ public class DecimalToRomanController {
         LOGGER.debug("convertDecimalToRoman start called with query input : " + query);
 
         /*validate query
-         - only integer bad req
-         - 1-3999 bad req
+         - bad req for non-integer
+         - bad req if not 1-3999
          -
         */
         if(query <=0 || query > 3999) {
