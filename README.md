@@ -12,15 +12,19 @@ This application uses Maven to build and resolve application dependencies.
 
 `mvn package`
 
+##JAVA application
 3- Execute the following command to run the application
 `java -jar target/adobe-roman-0.0.1-SNAPSHOT.jar`
 
 OR
 
+##DOCKER
 3.1- Execute following command to create an image from the jar file. (pre-requisite download and install Dcoker)
+
 `docker build -t adoberoman .`
 
-3.2 Execute following command to run the docker image
+3.2- Execute following command to run the docker image
+
 `docker run --name roman-numeral -p8080:8080 -d adoberoman`
 
 The application should be now up and running.
