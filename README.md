@@ -25,7 +25,8 @@ OR
 
 The application should be now up and running.
 Ex:
-`http://localhost:8080/romannumeral?query=660`
+
+http://localhost:8080/romannumeral?query=660
 
 The metrics, info and monitoring for the application is exposed at:  
 http://localhost:8080/actuator/info
